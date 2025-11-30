@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shopping List API – Instructions</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      line-height: 1.6;
+      color: #111827;
+    }
+    h1, h2, h3 {
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    code {
+      background: #f3f4f6;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+    pre {
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 0.75rem 0 1rem;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.4rem 0.6rem;
+      text-align: left;
+    }
+    th {
+      background: #f9fafb;
+    }
+    .tag {
+      display: inline-block;
+      padding: 0.1rem 0.4rem;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 0.75rem;
+      margin-left: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shopping List API – How to Run & Test</h1>
+
+  <p>
+    This document describes how to run and test the Node.js / Express API
+    implemented for the Shopping List homework. The focus of the assignment is on:
+  </p>
+  <ul>
+    <li>definition of <strong>dtoIn</strong> and <strong>dtoOut</strong> for each end-point (uuCmd),</li>
+    <li>validation of input data,</li>
+    <li>basic authorization based on application profiles,</li>
+    <li>returning <code>uuAppErrorMap</code> in responses.</li>
+  </ul>
+
+  <h2>1. How to run the server</h2>
+
+  <ol>
+    <li>Open a terminal in the folder that contains <code>server.js</code>.</li>
+    <li>Install dependencies:
+      <pre><code>npm install</code></pre>
+    </li>
+    <li>Start the server:
+      <pre><code>node server.js</code></pre>
+    </li>
+  </ol>
+
+  <p>
+    If everything is correct, you will see:
+  </p>
+  <pre><code>Shopping List API is running at http://localhost:3001</code></pre>
+
+  <h2>2. Application profiles (roles)</h2>
+  <p>
+    For the purpose of this homework, profiles are simulated in middleware
+    and attached to <code>req.user.profiles</code>.
+    The following profiles are defined:
+  </p>
+  <ul>
+    <li><code>Authorities</code> – application administrators</li>
+    <li><code>User</code> – any logged-in user</li>
+    <li><code>ShoppingListOwner</code> – owner of a particular list</li>
+    <li><code>ShoppingListMember</code> – member of a particular list</li>
+  </ul>
+  <p>
+    In the current demo configuration, the mocked user has profiles:
+    <code>User</code> and <code>ShoppingListOwner</code>.
+  </p>
+
+  <h2>3. Implemented end-points (uuCmds)</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Endpoint</th>
+        <th>Method</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>/shoppingList/create</code></td>
+        <td>POST</td>
+        <td>Create a new shopping list</td>
+      </tr>
+      <tr>
+        <td><code>/shoppingList/get</code></td>
+        <td>GET</td>
+        <td>Get a shopping list by id</td>
+      </tr>
+      <tr>
+        <td><code>/shoppingList/list</code></td>
+        <td>GET</td>
+        <td>List shopping lists (mocked data)</td>
+      </tr>
+      <tr>
+        <td><code>/shoppingList/update</code></td>
+        <td>POST</td>
+        <td>Update (rename) a shopping list</td>
+      </tr>
+      <tr>
+        <td><code>/shoppingList/delete</code></td>
+        <td>POST</td>
+        <td>Delete a shopping list</td>
+      </tr>
+      <tr>
+        <td><code>/shoppingList/addMember</code></td>
+        <td>POST</td>
+        <td>Add a member to a shopping list</td>
+      </tr>
+      <tr>
+        <td><code>/shoppingList/removeMember</code></td>
+        <td>POST</td>
+        <td>Remove a member from a shopping list</td>
+      </tr>
+      <tr>
+        <td><code>/shoppingList/leave</code></td>
+        <td>POST</td>
+        <td>Current user leaves a list</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    Every handler performs:
+  </p>
+  <ul>
+    <li>validation of <strong>dtoIn</strong>,</li>
+    <li>authorization check based on profiles (for example, only owner can delete),</li>
+    <li>return of <strong>dtoOut</strong> with a <code>uuAppErrorMap</code> object.</li>
+  </ul>
+
+  <h2>4. Example requests</h2>
+
+  <h3>4.1. Create a shopping list <span class="tag">POST /shoppingList/create</span></h3>
+  <p><strong>dtoIn</strong></p>
+  <pre><code>{
+  "name": "My Homework List"
+}</code></pre>
+
+  <p><strong>curl example</strong></p>
+  <pre><code>curl -X POST http://localhost:3001/shoppingList/create \
+  -H "Content-Type: application/json" \
+  -d "{\"name\": \"My Homework List\"}"</code></pre>
+
+  <h3>4.2. Get a shopping list <span class="tag">GET /shoppingList/get</span></h3>
+  <p><strong>dtoIn</strong> (query): <code>?id=list-1</code></p>
+  <pre><code>curl "http://localhost:3001/shoppingList/get?id=list-1"</code></pre>
+
+  <h3>4.3. List shopping lists <span class="tag">GET /shoppingList/list</span></h3>
+  <p>Query parameters <code>pageIndex</code> and <code>pageSize</code> are optional.</p>
+  <pre><code>curl "http://localhost:3001/shoppingList/list?pageIndex=0&amp;pageSize=10"</code></pre>
+
+  <h3>4.4. Update list name <span class="tag">POST /shoppingList/update</span></h3>
+  <p><strong>dtoIn</strong></p>
+  <pre><code>{
+  "id": "list-1",
+  "name": "Updated List Name"
+}</code></pre>
+
+  <h3>4.5. Delete a shopping list <span class="tag">POST /shoppingList/delete</span></h3>
+  <p><strong>dtoIn</strong></p>
+  <pre><code>{
+  "id": "list-1"
+}</code></pre>
+
+  <h3>4.6. Add a member <span class="tag">POST /shoppingList/addMember</span></h3>
+  <p><strong>dtoIn</strong></p>
+  <pre><code>{
+  "listId": "list-1",
+  "uuIdentity": "uu5:8765-4321",
+  "role": "member"
+}</code></pre>
+
+  <h3>4.7. Leave a list <span class="tag">POST /shoppingList/leave</span></h3>
+  <p><strong>dtoIn</strong></p>
+  <pre><code>{
+  "listId": "list-1"
+}</code></pre>
+
+  <h2>5. Error handling – uuAppErrorMap</h2>
+
+  <p>
+    All responses follow the uuApp approach and contain a <code>uuAppErrorMap</code> object.
+    On successful requests it is usually empty:
+  </p>
+  <pre><code>{
+  "awid": "shoppingListApp",
+  "id": "list-123456789",
+  "name": "My Homework List",
+  "state": "active",
+  "ownerUuIdentity": "uu5:1234-5678",
+  "members": [],
+  "items": [],
+  "uuAppErrorMap": {}
+}</code></pre>
+
+  <p>
+    In case of validation or authorization errors, entries are stored in
+    <code>uuAppErrorMap</code>, e.g.:
+  </p>
+  <pre><code>{
+  "uuAppErrorMap": {
+    "shoppingList/create/invalidName": {
+      "type": "error",
+      "message": "name is required and must be a non-empty string.",
+      "paramMap": {
+        "name": ""
+      }
+    }
+  }
+}</code></pre>
+
+  <p>
+    This demonstrates the required structure of input / output data and error
+    reporting for the homework task.
+  </p>
+</body>
+</html>
