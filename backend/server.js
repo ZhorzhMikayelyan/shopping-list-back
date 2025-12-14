@@ -13,26 +13,12 @@ const MONGODB_URI = process.env.MONGODB_URI;
 app.use(cors());
 app.use(express.json());
 
-// ----- подключение к MongoDB -----
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    console.log("✅ Connected to MongoDB");
-    app.listen(PORT, () => {
-      console.log(`🚀 API listening at http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection error:", err);
-    process.exit(1);
-  });
-
-// маленький helper для возвращаемой структуры
+// helper для возвращаемой структуры
 function buildResponse(data, errorMap = {}) {
   return { ...data, uuAppErrorMap: errorMap };
 }
 
-// в реальном приложении owner берётся из токена, а тут просто фиксируем
+// mock owner
 const MOCK_OWNER = "uu5:1234-5678";
 
 // ====================================================================
@@ -55,19 +41,14 @@ app.get("/shoppingList/list", async (req, res) => {
     res.json(buildResponse(dtoOut));
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json(
-        buildResponse(
-          {},
-          {
-            "shoppingList/list/failed": {
-              type: "error",
-              message: "Unexpected error while listing shopping lists.",
-            },
-          }
-        )
-      );
+    res.status(500).json(
+      buildResponse({}, {
+        "shoppingList/list/failed": {
+          type: "error",
+          message: "Unexpected error while listing shopping lists.",
+        },
+      })
+    );
   }
 });
 
@@ -111,19 +92,14 @@ app.get("/shoppingList/get/:id", async (req, res) => {
     res.json(buildResponse(dtoOut));
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json(
-        buildResponse(
-          {},
-          {
-            "shoppingList/get/failed": {
-              type: "error",
-              message: "Unexpected error while getting shopping list.",
-            },
-          }
-        )
-      );
+    res.status(500).json(
+      buildResponse({}, {
+        "shoppingList/get/failed": {
+          type: "error",
+          message: "Unexpected error while getting shopping list.",
+        },
+      })
+    );
   }
 });
 
@@ -164,19 +140,14 @@ app.post("/shoppingList/create", async (req, res) => {
     res.status(201).json(buildResponse(dtoOut));
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json(
-        buildResponse(
-          {},
-          {
-            "shoppingList/create/failed": {
-              type: "error",
-              message: "Unexpected error while creating shopping list.",
-            },
-          }
-        )
-      );
+    res.status(500).json(
+      buildResponse({}, {
+        "shoppingList/create/failed": {
+          type: "error",
+          message: "Unexpected error while creating shopping list.",
+        },
+      })
+    );
   }
 });
 
@@ -247,19 +218,14 @@ app.put("/shoppingList/update/:id", async (req, res) => {
     res.json(buildResponse(dtoOut));
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json(
-        buildResponse(
-          {},
-          {
-            "shoppingList/update/failed": {
-              type: "error",
-              message: "Unexpected error while updating shopping list.",
-            },
-          }
-        )
-      );
+    res.status(500).json(
+      buildResponse({}, {
+        "shoppingList/update/failed": {
+          type: "error",
+          message: "Unexpected error while updating shopping list.",
+        },
+      })
+    );
   }
 });
 
@@ -291,26 +257,36 @@ app.delete("/shoppingList/delete/:id", async (req, res) => {
       return res.status(404).json(buildResponse({}, errorMap));
     }
 
-    const dtoOut = {
-      id: list._id.toString(),
-      deleted: true,
-    };
-
+    const dtoOut = { id: list._id.toString(), deleted: true };
     res.json(buildResponse(dtoOut));
   } catch (err) {
     console.error(err);
-    res
-      .status(500)
-      .json(
-        buildResponse(
-          {},
-          {
-            "shoppingList/delete/failed": {
-              type: "error",
-              message: "Unexpected error while deleting shopping list.",
-            },
-          }
-        )
-      );
+    res.status(500).json(
+      buildResponse({}, {
+        "shoppingList/delete/failed": {
+          type: "error",
+          message: "Unexpected error while deleting shopping list.",
+        },
+      })
+    );
   }
 });
+
+// ✅ Export app for unit tests
+module.exports = { app, buildResponse };
+
+// ✅ Start server only when executed directly (not when imported by Jest)
+if (require.main === module) {
+  mongoose
+    .connect(MONGODB_URI)
+    .then(() => {
+      console.log("✅ Connected to MongoDB");
+      app.listen(PORT, () => {
+        console.log(`🚀 API listening at http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error("❌ MongoDB connection error:", err);
+      process.exit(1);
+    });
+}
